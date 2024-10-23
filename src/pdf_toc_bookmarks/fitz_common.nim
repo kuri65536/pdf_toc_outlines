@@ -2,7 +2,9 @@
 
 License: MIT, see LICENSE
 ]##
-{.passL: "-lmupdf -lmupdf-third -lmujs -lgumbo -lopenjp2 -ljbig2dec -ljpeg -lz -lm -lfreetype".}
+{.passL: "-lmupdf -lmupdf-third -lmujs -lgumbo -lopenjp2 -ljbig2dec" .}
+{.passL: "-ljpeg -lz -lm -lfreetype" .}
+{.passL: "-lharfbuzz" .}
 
 type
   FitzConst* = enum
