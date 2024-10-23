@@ -1,2 +1,6 @@
-./pdf_toc_bookmarks
+pdf_toc_bookmarks
+nimcache
+testresults
+testresults.html
+tests/test_open
 
