@@ -25,12 +25,33 @@ proc register_handler(fz: pointer): bool =
     return f
 
 
+proc open_document(fz: pointer, filename: cstring): pointer =
+    var f = false;
+    var doc: pointer = nil
+    {.emit: """fz_try(`fz`) {
+            `doc` = fz_open_document(`fz`, `filename`);
+        } fz_catch(`fz`) {
+            `f` = true;
+            // fz_report_error(`fz`);
+            fz_drop_context(`fz`);
+        }
+    """.}
+    if f:
+        return nil
+    return doc
+
+
 proc pdf_open*(filename: string): PdfDoc =
     let fz = fz_new_context(nil, nil, FitzConst.STORE_UNLIMITTED)
     if isNil(fz):
         return nil
     if register_handler(fz):
         return nil
+    let doc = open_document(fz, cstring(filename))
+    if isNil(doc):
+        return nil
 
-    result = PdfDoc(fitz: fz)
+    result = PdfDoc(fitz: fz,
+                    fitz_doc: doc,
+                    )
 
