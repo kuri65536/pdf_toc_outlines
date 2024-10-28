@@ -41,6 +41,12 @@ proc open_document(fz: pointer, filename: cstring): pointer =
     return doc
 
 
+proc close_document(fz, doc: pointer): void =
+    {.emit: """fz_drop_document(`fz`, `doc`);
+               fz_drop_context(`fz`);
+     """.}
+
+
 proc pdf_open*(filename: string): PdfDoc =
     let fz = fz_new_context(nil, nil, FitzConst.STORE_UNLIMITTED)
     if isNil(fz):
@@ -54,4 +60,8 @@ proc pdf_open*(filename: string): PdfDoc =
     result = PdfDoc(fitz: fz,
                     fitz_doc: doc,
                     )
+
+
+proc pdf_close*(pdf: PdfDoc): void =
+    close_document(pdf.fitz, pdf.fitz_doc)
 
