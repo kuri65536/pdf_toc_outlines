@@ -3,4 +3,5 @@ nimcache
 testresults
 testresults.html
 tests/test_open
+tests/test_save
 
