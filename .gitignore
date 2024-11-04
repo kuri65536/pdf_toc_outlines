@@ -4,6 +4,7 @@ testresults
 testresults.html
 tests/test_links
 tests/test_open
+tests/test_outlines
 tests/test_pages
 tests/test_save
 
