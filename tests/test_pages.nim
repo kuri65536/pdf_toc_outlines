@@ -1,4 +1,4 @@
-##[test_open.nim
+##[test_pages.nim
 
 License: MIT, see LICENSE
 ]##
