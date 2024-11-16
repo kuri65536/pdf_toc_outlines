@@ -4,60 +4,248 @@ License: MIT, see LICENSE
 ]##
 {.emit: "#include <mupdf/fitz.h>".}
 
+import streams
+import strutils
+import parsexml
+import tables
+import unicode
+
 import pdf_common
 
 
 type
+  rect_tup = tuple[x0, y0, x1, y1: float]
+
   PdfLink* = ref object of RootObj
+    pdf_page: pointer
+    #[
+    n_page: int
+    ]#
+    p_dev: pointer
     p_link: pointer
+    p_outs: pointer
+    p_page: pointer
     uri*: string
     title*: string
     x*: float
-    n_page: int
+    rect: rect_tup
+
+  pdf_text = tuple[x, y: float, pt: float, text: string]
+
+var strm {.threadvar.}: StringStream
 
 
-proc fz_load_links(a, b: pointer, n_page: int): pointer =
+proc contains(self: rect_tup, x, y: float): bool =
+    if x < self.x0: return false
+    if y < self.y0: return false
+    if x > self.x1: return false
+    if y > self.y1: return false
+    return true
+
+
+proc fz_load_links(a, b: pointer, n_page: int): tuple[link, page: pointer] =
+    var l, p: pointer
     {.emit: """fz_page* page = fz_load_page(`a`, `b`, `n_page`);
-               `result` = fz_load_links(`a`, page);
+                `l` = fz_load_links(`a`, page);
+                `p` = page;
                """}
+    return (l, p)
 
 
-proc fz_load_text(a, b: pointer, n_page: int): pointer =
+proc sort_text(src: seq[pdf_text]): string =
+    discard
+
+
+proc xml_parse_attr(x: var XmlParser, tag: string
+                    ): tuple[f: bool, attrs: Table[string, string]] =
+    var ret = initTable[string, string]()
+    while true:
+        next(x)
+        case x.kind
+        of xmlAttribute:
+            let (key, val) = (x.attrKey, x.attrValue)
+            #cho("attr: new key-val -> (" & key & ", " & val & ")")
+            ret[key] = val
+        of xmlElementClose:
+            return (true, ret)
+        of xmlEof:
+            return (false, ret)
+        else:
+            echo("attr: waste?")
+            discard
+    return (false, ret)
+
+
+proc xml_parse(x: var XmlParser, rect: rect_tup): seq[pdf_text]
+
+
+proc xml_parse_element_char(cur: seq[pdf_text],
+                            attrs: Table[string, string], rect: rect_tup
+                            ): seq[pdf_text] =
+    #cho("element-char: " & $attrs)
+    let ch = block:
+        let s_num = attrs.getOrDefault("ucs", "")
+        let num = parseInt(s_num)
+        Rune(num).toUTF8()
+    if len(ch) < 1:
+        return cur
+    let x = parseFloat(attrs["x"])
+    let y = parseFloat(attrs["y"])
+    if not rect.contains(x, y):
+        return cur
+    #cho("found text: " & ch)
+    #cho("found in rect: attrs: " & $attrs)
+    var tmp: seq[pdf_text]
+    for i in cur:
+        tmp.add(i)
+    tmp.add((x, y, 11.0, ch))
+    return tmp
+
+
+proc xml_parse_element_tag(tag: string, cur: seq[pdf_text],
+                           attrs: Table[string, string], rect: rect_tup
+                           ): seq[pdf_text] =
+    if tag == "char":
+        return xml_parse_element_char(cur, attrs, rect)
+    elif tag == "span":
+        #cho("element-span: attrs:" & $attrs)
+        var (tmp, x, y) = ("", 9999.0, 9999.0)
+        for i in cur:
+            (x, y) = (min(x, i.x), min(y, i.y))
+            tmp &= i.text
+        if len(tmp) < 1:
+            return @[]
+        let tmp2 = (x, y, 11.0, tmp)
+        return @[tmp2]
+    else:
+        #cho("unproceed tag(" & tag & "): " & $attrs)
+        discard
+    return cur
+
+
+proc xml_parse_element(x: var XmlParser, tag: string, rect: rect_tup,
+                       attrs = initTable[string, string]()): seq[pdf_text] =
+    #cho("enter " & tag & ":" & $attrs)
+    result = @[]
+    while true:
+        next(x)
+        case x.kind
+        of xmlElementEnd:
+            if x.elementName != tag:
+                # error
+                discard
+            break
+        of xmlEof:
+            break
+        of xmlElementStart:
+            let ret = xml_parse_element(x, x.elementName, rect)
+            result.add(ret)
+        of xmlElementOpen:
+            let tag = x.elementName
+            let (f, attr) = xml_parse_attr(x, tag)
+            if f:
+                let ret = xml_parse_element(x, tag, rect, attr)
+                result.add(ret)
+        #[ no raw text in pdf as stext
+        of xmlCharData, xmlWhitespace:
+            text &= x.charData
+        ]#
+        else:
+            discard
+    result = xml_parse_element_tag(tag, result, attrs, rect)
+
+
+proc xml_parse(x: var XmlParser, rect: rect_tup): seq[pdf_text] =
+    result = @[]
+    while true:
+        x.next()
+        case x.kind:
+        of xmlEof:
+            break
+        of xmlElementStart:
+            let ret = xml_parse_element(x, x.elementName, rect)
+            result.add(ret)
+        of xmlElementOpen:
+            let tag = x.elementName
+            let (f, attr) = xml_parse_attr(x, tag)
+            if f:
+                let ret = xml_parse_element(x, tag, rect, attr)
+                result.add(ret)
+        else:
+            discard
+
+
+proc parse_fzstext_inrect*(strm: Stream, rect: rect_tup): seq[pdf_text] =
+    var x: XmlParser
+    open(x, strm, "", {})
+    let nodes = xml_parse(x, rect)
+    close(x)
+    return nodes
+
+
+proc fz_load_text(a, b: pointer, src: PdfLink): string =
+    if not isNil(strm):
+        # need to lock...
+        discard
+    strm = newStringStream()
+
     proc fn(ctx, state, data: pointer, n: uint): void {.cdecl.} =
         let tmp = cast[ptr UncheckedArray[char]](data)
-        var s: string
         for i in 0 .. n - 1:
-            let ch = tmp[i]
-            if ch == '\n' or len(s) > 80:
-                echo(s)
-                s = ""
-            else:
-                s = s & ch
-        if len(s) > 0:
-            echo(s)
-    {.emit: """ fz_page* page = fz_load_page(`a`, `b`, `n_page`);
+            strm.write(tmp[i])
+
+    let p_page = src.pdf_page
+    {.emit: """ fz_page* page = (fz_page*)`p_page`;
                 fz_output* out = fz_new_output(`a`, 1024, NULL, `fn`, NULL, NULL);
                 fz_device* dev = fz_new_xmltext_device(`a`, out);
                 fz_run_page(`a`, page, dev, fz_identity, NULL);
+                fz_drop_device(`a`, dev);
+                fz_drop_output(`a`, out);
                """}
+
+    strm.flush()
+    strm.setPosition(0)
+    #[
+    echo(strm.readAll())
+    strm.setPosition(0)
+    ]#
+    let nodes = parse_fzstext_inrect(strm, src.rect)
+    close(strm)
+    strm = nil
+
+    return sort_text(nodes)
+
+
+proc pdf_link_pointer*(src: pointer, page: pointer): PdfLink =
+    var tmp: cstring
+    var x0, y0, x1, y1: cfloat
+    {.emit: """fz_link* l = (fz_link*)`src`;
+               `tmp` = l->uri;
+               `x0` = l->rect.x0;
+               `y0` = l->rect.y0;
+               `x1` = l->rect.x1;
+               `y1` = l->rect.y1;
+               """}
+    result = PdfLink(
+        p_link: src,
+        pdf_page: page,
+        uri: $tmp,
+        rect: (float(x0), float(y0), float(x1), float(y1)),
+    )
+    #cho($result.rect)
+
 
 
 proc pdf_link*(pdf: PdfDoc, n_page: int): PdfLink =
-    result = PdfLink()
-    let link = fz_load_links(pdf.fitz, pdf.fitz_doc, n_page)
+    let (link, page) = fz_load_links(pdf.fitz, pdf.fitz_doc, n_page)
+    #cho("pdf_link: " & $n_page & " ... " & $isNil(link))
     if isNil(link):
         return nil
-    result.p_link = link
-    var tmp: cstring
-    {.emit: """fz_link* l = (fz_link*)`link`;
-               `tmp` = l->uri;
-               """}
-    result.uri = $tmp
-    result.n_page = n_page
-    discard fz_load_text(pdf.fitz, pdf.fitz_doc, n_page)
+    result = pdf_link_pointer(link, page)
+    result.title = fz_load_text(pdf.fitz, pdf.fitz_doc, result)
 
 
-proc pdf_link_next*(link: PdfLink): PdfLink =
+proc pdf_link_next*(pdf: PdfDoc, link: PdfLink): PdfLink =
     var p = link.p_link
     if isNil(p):
         return nil
@@ -66,12 +254,6 @@ proc pdf_link_next*(link: PdfLink): PdfLink =
                """}
     if isNil(p):
         return nil
-
-    var tmp: cstring
-    {.emit: """fz_link* l2 = (fz_link*)`p`;
-               `tmp` = l2->uri;
-               """}
-    result = PdfLink(n_page: link.n_page,
-                     p_link: p,
-                     uri: $tmp)
+    result = pdf_link_pointer(p, link.pdf_page)
+    result.title = fz_load_text(pdf.fitz, pdf.fitz_doc, result)
 
