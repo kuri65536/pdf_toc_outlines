@@ -13,7 +13,7 @@ for page in pdf_doc.pdf_pages(pdf):
     echo("search " & $page & "...")
     var link = pdf_links.pdf_link(pdf, page)
     while not isNil(link):
-        echo(link.uri)
+        echo("found link: " & link.title & " -> " & link.uri)
         link = pdf_links.pdf_link_next(pdf, link)
 
 pdf_open.pdf_close(pdf)

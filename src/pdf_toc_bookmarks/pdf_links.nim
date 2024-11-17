@@ -53,7 +53,50 @@ proc fz_load_links(a, b: pointer, n_page: int): tuple[link, page: pointer] =
 
 
 proc sort_text(src: seq[pdf_text]): string =
-    discard
+
+    proc insert2(t: var seq[tuple[y: float, strs: seq[pdf_text]]],
+                 n: int, s: pdf_text) =
+        let (y, tmp) = t[n]
+        var (m, tmp2) = (-1, tmp)
+        for m, i in tmp:
+            if i.x > s.x:
+                break
+        if m < 0:
+            tmp2.add(s)
+        else:
+            tmp2.insert(s, m)
+        t[n] = (y, tmp2)
+
+    proc insert(t: var seq[tuple[y: float, strs: seq[pdf_text]]],
+                s: pdf_text) =
+        var n = -1
+        for m, k in t:
+            if s.y < k.y:
+                n = m; break
+        if n < 0:
+            t.add((s.y, @[s]))
+        else:
+            insert2(t, n, s)
+
+    const same_y = 1e-4
+    var rows: seq[tuple[y: float, strs: seq[pdf_text]]]
+    for i in src:
+        var n = -1
+        for j, (y0, tmp2) in rows:
+            let dy = system.abs(i.y - y0)
+            if dy < same_y:
+                n = j
+                break
+        if n < 0:
+            insert(rows, i)
+            continue
+        insert2(rows, n, i)
+
+    result = ""
+    for row in rows:
+        for s in row.strs:
+            result &= s.text
+    return result
 
 
 proc xml_parse_attr(x: var XmlParser, tag: string
