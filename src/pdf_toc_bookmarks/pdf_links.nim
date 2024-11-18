@@ -43,6 +43,39 @@ proc contains(self: rect_tup, x, y: float): bool =
     return true
 
 
+proc parse_span_ctm(src: Table[string, string]): array[6, float] =
+    const fallback = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
+    #onst key = "ctm"
+    const key = "trm"
+    if not src.contains(key):
+        return fallback
+    let s_ctm = src[key]
+    let a_ctm = s_ctm.split(' ')
+    for idx, i in a_ctm:
+        let f = try:
+              parseFloat(strutils.strip(i))
+          except ValueError:
+              return fallback
+        result[idx] = f
+
+
+proc fz_trans_pt(src: tuple[x, y: float], mat: array[6, float]
+                 ): tuple[x, y: float] =
+    let (a, b, c, d, e, f) = (mat[0], mat[1], mat[2],
+                              mat[3], mat[4], mat[5])
+    echo("trans:max: " & $mat)
+    echo("trans:src: " & $src)
+    var (x, y) = (src.x, src.y)
+    {.emit: """ fz_matrix mat = fz_make_matrix(`a`, `b`, `c`, `e`, `d`, `f`);
+                fz_point cur = fz_make_point(`x`, `y`);
+                fz_point pt = fz_transform_vector(cur, mat);
+                `x` = pt.x;
+                `y` = pt.y;
+                """.}
+    echo("trans:ret: " & $x & "," & $y)
+    return (x, y)
+
+
 proc fz_load_links(a, b: pointer, n_page: int): tuple[link, page: pointer] =
     var l, p: pointer
     {.emit: """fz_page* page = fz_load_page(`a`, `b`, `n_page`);
@@ -134,13 +167,10 @@ proc xml_parse_element_char(cur: seq[pdf_text],
         return cur
     let x = parseFloat(attrs["x"])
     let y = parseFloat(attrs["y"])
-    if not rect.contains(x, y):
-        return cur
+
     #cho("found text: " & ch)
     #cho("found in rect: attrs: " & $attrs)
-    var tmp: seq[pdf_text]
-    for i in cur:
-        tmp.add(i)
+    var tmp = cur
     tmp.add((x, y, 11.0, ch))
     return tmp
 
@@ -150,16 +180,24 @@ proc xml_parse_element_tag(tag: string, cur: seq[pdf_text],
                            ): seq[pdf_text] =
     if tag == "char":
         return xml_parse_element_char(cur, attrs, rect)
+
     elif tag == "span":
+        #cho("element-span: rect:" & $rect)
         #cho("element-span: attrs:" & $attrs)
+        let ctm = parse_span_ctm(attrs)
         var (tmp, x, y) = ("", 9999.0, 9999.0)
         for i in cur:
             (x, y) = (min(x, i.x), min(y, i.y))
+            let (x0, y0) = fz_trans_pt((x, y), ctm)
+            if not rect.contains(x0, y0):
+                continue
             tmp &= i.text
         if len(tmp) < 1:
             return @[]
+
         let tmp2 = (x, y, 11.0, tmp)
         return @[tmp2]
+
     else:
         #cho("unproceed tag(" & tag & "): " & $attrs)
         discard
