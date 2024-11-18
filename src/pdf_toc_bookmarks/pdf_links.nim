@@ -36,17 +36,18 @@ var strm {.threadvar.}: StringStream
 
 
 proc contains(self: rect_tup, x, y: float): bool =
-    if x < self.x0: return false
-    if y < self.y0: return false
-    if x > self.x1: return false
-    if y > self.y1: return false
+    const th = 0.5
+    if x - self.x0 < -th: return false
+    if y - self.y0 < -th: return false
+    if x - self.x1 >  th: return false
+    if y - self.y1 >  th: return false
     return true
 
 
 proc parse_span_ctm(src: Table[string, string]): array[6, float] =
     const fallback = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0]
-    #onst key = "ctm"
-    const key = "trm"
+    const key = "ctm"
+    #onst key = "trm"
     if not src.contains(key):
         return fallback
     let s_ctm = src[key]
@@ -63,16 +64,16 @@ proc fz_trans_pt(src: tuple[x, y: float], mat: array[6, float]
                  ): tuple[x, y: float] =
     let (a, b, c, d, e, f) = (mat[0], mat[1], mat[2],
                               mat[3], mat[4], mat[5])
-    echo("trans:max: " & $mat)
-    echo("trans:src: " & $src)
+    #cho("trans:max: " & $mat)
+    #cho("trans:src: " & $src)
     var (x, y) = (src.x, src.y)
-    {.emit: """ fz_matrix mat = fz_make_matrix(`a`, `b`, `c`, `e`, `d`, `f`);
+    {.emit: """ fz_matrix mat = fz_make_matrix(`a`, `b`, `c`, `d`, `e`, `f`);
                 fz_point cur = fz_make_point(`x`, `y`);
-                fz_point pt = fz_transform_vector(cur, mat);
+                fz_point pt = fz_transform_point(cur, mat);
                 `x` = pt.x;
                 `y` = pt.y;
                 """.}
-    echo("trans:ret: " & $x & "," & $y)
+    #cho("trans:ret: " & $x & "," & $y)
     return (x, y)
 
 
@@ -187,10 +188,11 @@ proc xml_parse_element_tag(tag: string, cur: seq[pdf_text],
         let ctm = parse_span_ctm(attrs)
         var (tmp, x, y) = ("", 9999.0, 9999.0)
         for i in cur:
-            (x, y) = (min(x, i.x), min(y, i.y))
-            let (x0, y0) = fz_trans_pt((x, y), ctm)
-            if not rect.contains(x0, y0):
+            let (xi, yi) = fz_trans_pt((i.x, i.y), ctm)
+            if not rect.contains(xi, yi):
+                #cho("span-ignored: " & $xi & "," & $yi & "->" & i.text & " in" & $rect)
                 continue
+            (x, y) = (min(x, xi), min(y, yi))
             tmp &= i.text
         if len(tmp) < 1:
             return @[]
