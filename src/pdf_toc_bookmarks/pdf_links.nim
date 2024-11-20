@@ -14,13 +14,12 @@ import pdf_common
 
 
 type
-  rect_tup = tuple[x0, y0, x1, y1: float]
+  rect_tup* = tuple[x0, y0, x1, y1: float]
 
   PdfLink* = ref object of RootObj
     pdf_page: pointer
-    #[
-    n_page: int
-    ]#
+    n_page*: int
+        ## cache to the page number, used by leveling.
     p_dev: pointer
     p_link: pointer
     p_outs: pointer
@@ -28,7 +27,7 @@ type
     uri*: string
     title*: string
     x*: float
-    rect: rect_tup
+    rect*: rect_tup
 
   pdf_text = tuple[x, y: float, pt: float, text: string]
 

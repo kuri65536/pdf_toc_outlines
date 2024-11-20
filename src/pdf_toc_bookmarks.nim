@@ -5,24 +5,33 @@ License: MIT, see LICENSE
 import os
 import system
 
-
-type
-  Options* = ref object of RootObj
-    n_quit: int
-
-
-proc options(args: seq[string]): Options =
-    var ret = Options(
-                      )
-    return ret
+import pdf_toc_bookmarks/app_extract
+import pdf_toc_bookmarks/app_levels
+import pdf_toc_bookmarks/app_merge
+import pdf_toc_bookmarks/app_outlines
+import pdf_toc_bookmarks/options
 
 
 proc main(args: seq[string]): int =
     let opts = options(args)
     if opts.n_quit != 0:
         return opts.n_quit
-    ## @todo impl run
-    return 0
+    let (pdf, links) = extract_links(opts.filename, opts.n_pages)
+    if isNil(pdf):
+        return 11
+    if len(links) < 1:
+        return 12
+
+    let links2 = merge_links(opts.n_merge, links)
+    if len(links2) < 1:
+        return 21
+
+    let links3 = level_links(opts.n_levels, links2)
+    if len(links3) < 1:
+        return 31
+
+    let err = outlines_from_links(pdf, links3)
+    return err
 
 
 when isMainModule:
