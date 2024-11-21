@@ -28,14 +28,26 @@ proc make_newname*(src, org: string): string =
 
 proc outlines_from_links*(pdf: PdfDoc, links: seq[Link], fname_out: string
                           ): int =
+    let it = pdf_new_outline_iter(pdf)
     var level = 0
     for i in links:
-        if i.level > level:
-            discard  # level-down
-        elif i.level < level:
-            discard  # level-up
-        else:
-            pdf_outlines.pdf_add_outline(pdf, -1, i.uri, i.title)
+        if level > i.level:
+            while level > i.level:
+                let ret = pdf_outlines.pdf_outline_iter_up(pdf, it)
+                echo("outline:up:   " & $ret & "->" & i.title)
+                level -= 1
+            let ret = pdf_outlines.pdf_outline_iter_next(pdf, it)
+            echo("outline:next: " & $ret & "->" & i.title)
+        elif level < i.level:
+            let ret = pdf_outlines.pdf_outline_iter_prev(pdf, it)
+            echo("outline:prev: " & $ret & "->" & i.title)
+            while level < i.level:
+                let ret = pdf_outlines.pdf_outline_iter_down(pdf, it)
+                echo("outline:down: " & $ret & "->" & i.title)
+                level += 1
+        let ret = pdf_outlines.pdf_add_outline2(pdf, it, i.uri, i.title)
+        echo("outline:add:  " & $ret & " <- " & i.title)
+    pdf_outlines.pdf_drop_outline_iter(pdf, it)
 
     if len(links) > 0:
         let fout = make_newname(fname_out, pdf.filename)

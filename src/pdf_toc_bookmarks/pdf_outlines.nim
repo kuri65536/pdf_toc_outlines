@@ -7,6 +7,70 @@ License: MIT, see LICENSE
 import pdf_common
 
 
+type
+  PdfOutlineIter* = ref object of RootObj
+    p: pointer
+
+
+proc pdf_new_outline_iter*(pdf: PdfDoc): PdfOutlineIter =
+    let a = pdf.fitz
+    let b = pdf.fitz_doc
+    var c: pointer
+    {.emit: """ fz_outline_iterator* iter = fz_new_outline_iterator(`a`, `b`);
+                `c` = iter;
+                """.}
+    return PdfOutlineIter(p: c)
+
+    
+proc pdf_drop_outline_iter*(pdf: PdfDoc, it: PdfOutlineIter): void =
+    let a = pdf.fitz
+    let c = it.p
+    {.emit: """ fz_drop_outline_iterator(`a`, `c`);
+               """.}
+
+
+proc pdf_outline_iter_up*(pdf: PdfDoc, it: PdfOutlineIter): int =
+    let a = pdf.fitz
+    let c = it.p
+    {.emit: """ `result` = fz_outline_iterator_up(`a`, `c`);
+                """.}
+
+
+proc pdf_outline_iter_down*(pdf: PdfDoc, it: PdfOutlineIter): int =
+    let a = pdf.fitz
+    let c = it.p
+    {.emit: """ `result` = fz_outline_iterator_down(`a`, `c`);
+                """.}
+
+
+proc pdf_outline_iter_prev*(pdf: PdfDoc, it: PdfOutlineIter): int =
+    let a = pdf.fitz
+    let c = it.p
+    {.emit: """ `result` = fz_outline_iterator_prev(`a`, `c`);
+                """.}
+
+
+proc pdf_outline_iter_next*(pdf: PdfDoc, it: PdfOutlineIter): int =
+    let a = pdf.fitz
+    let c = it.p
+    {.emit: """ `result` = fz_outline_iterator_next(`a`, `c`);
+                """.}
+
+
+proc pdf_add_outline2*(pdf: PdfDoc, it: PdfOutlineIter,
+                       uri, title: string): int =
+    let a = pdf.fitz
+    let c = it.p
+    let c_title = cstring(title)
+    let c_uri = cstring(uri)
+    {.emit: """ fz_outline_item item_new = {0};
+                item_new.title = `c_title`;
+                item_new.uri = `c_uri`;
+                item_new.is_open = 0;
+                `result` = fz_outline_iterator_insert(`a`, `c`, &item_new);
+               """.}
+
+
 proc fz_add_outline_to_last*(a, b: pointer, uri, title: cstring): void =
     var n = 0
     {.emit: """ fz_outline_iterator* iter = fz_new_outline_iterator(`a`, `b`);
