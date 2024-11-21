@@ -13,6 +13,7 @@ type
     n_levels*: int
     n_merge*: int
     n_pages*: seq[int]
+    n_subst*: int
     n_quit*: int
 
   fn_opt = proc(self: Options, args: var seq[string]): bool {.noSideEffect, gcsafe.}
