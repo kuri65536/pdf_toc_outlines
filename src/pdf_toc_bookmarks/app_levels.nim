@@ -51,7 +51,6 @@ proc level_links_by_xpos(links: seq[PdfLink]): seq[Link] =
                 if page != 0: return page
                 return system.cmp(a.rect.y0, b.rect.y0)
                 )
-    
 
     ## - loop
     const th = 4
@@ -68,7 +67,6 @@ proc level_links_by_xpos(links: seq[PdfLink]): seq[Link] =
             uri: i.uri,
             level: level,
         ))
-        
 
 
 proc level_links*(alg: int, links: seq[PdfLink]): seq[Link] =

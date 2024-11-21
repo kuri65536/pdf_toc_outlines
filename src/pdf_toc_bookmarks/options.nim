@@ -2,17 +2,20 @@
 
 License: MIT, see LICENSE
 ]##
-import os
+import tables
 
 
 type
   Options* = ref object of RootObj
     filename*: string
+    outname*: string
     n_alg*: int
     n_levels*: int
     n_merge*: int
     n_pages*: seq[int]
     n_quit*: int
+
+  fn_opt = proc(self: Options, args: var seq[string]): bool {.noSideEffect, gcsafe.}
 
 
 proc usage(): void =
@@ -22,8 +25,30 @@ proc usage(): void =
     echo(prg & ": extract the TOC and modify pdf outlines")
     echo(pfx & "usage: " & prg & " [options] [file]")
     echo(pfx & "options: ")
+    echo(pfx & "  --output or -o [file]   ... specify the output file name")
     echo(pfx & "  --pages or -p [numbers] ... specify TOC pages")
     ## @todo implement
+
+
+func option_output(self: Options, args: var seq[string]): bool =
+    ## @todo implement the error checks
+    ## - check the directory exists.
+    ## - check it writable.
+    self.outname = args[0]
+    args.delete(0)
+    return false
+
+
+proc have_arg(arg: string): fn_opt =
+    let fns = {
+        (s: "o", l: "output"): option_output,
+    }.toTable()
+
+    #cho("options:have_arg: " & arg)
+    for i in fns.keys():
+        if arg == ("-" & i.s) or arg == ("--" & i.l):
+            return fns[i]
+    return nil
 
 
 proc options*(args: seq[string]): Options =
@@ -37,7 +62,17 @@ proc options*(args: seq[string]): Options =
         usage()
         ret.n_quit = 1
         return ret
-        
-    ret.filename = args[0]
+
+    var (tmp, files) = (args, @[""])
+    while len(tmp) > 0:
+        let arg = tmp[0]
+        tmp.delete(0)
+        let fn = have_arg(arg)
+        if isNil(fn):
+            files.add(arg)
+        else:
+            if fn(ret, tmp):  # abort
+                return ret
+    ret.filename = files[1]
     return ret
 

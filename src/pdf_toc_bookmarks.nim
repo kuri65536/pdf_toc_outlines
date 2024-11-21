@@ -30,7 +30,7 @@ proc main(args: seq[string]): int =
     if len(links3) < 1:
         return 31
 
-    let err = outlines_from_links(pdf, links3)
+    let err = outlines_from_links(pdf, links3, opts.outname)
     return err
 
 

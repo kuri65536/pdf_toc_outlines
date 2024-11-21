@@ -10,7 +10,7 @@ import pdf_open
 
 proc extract_links*(fname: string, pages: seq[int]
                     ): tuple[pdf: PdfDoc, links: seq[PdfLink]] =
-    var pdf = pdf_open.pdf_open("test.pdf")
+    var pdf = pdf_open.pdf_open(fname)
     if isNil(pdf):
         return (nil, @[])
 

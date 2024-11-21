@@ -9,3 +9,5 @@ type
     fitz*: pointer
     fitz_doc*: pointer
 
+    filename*: string
+

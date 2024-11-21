@@ -59,6 +59,7 @@ proc pdf_open*(filename: string): PdfDoc =
 
     result = PdfDoc(fitz: fz,
                     fitz_doc: doc,
+                    filename: filename,
                     )
 
 
