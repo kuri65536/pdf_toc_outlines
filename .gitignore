@@ -4,6 +4,7 @@ testresults
 testresults.html
 tests/test_links
 tests/test_open
+tests/test_option_pages
 tests/test_outlines
 tests/test_pages
 tests/test_parse_stext

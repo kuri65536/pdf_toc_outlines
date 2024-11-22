@@ -147,7 +147,7 @@ proc xml_parse_attr(x: var XmlParser, tag: string
         of xmlEof:
             return (false, ret)
         else:
-            echo("attr: waste?")
+            #cho("attr: waste?")
             discard
     return (false, ret)
 

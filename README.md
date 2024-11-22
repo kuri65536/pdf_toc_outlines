@@ -79,7 +79,7 @@ option   | short | parameter | desc.
 
 
 #### option: --pages
-specify the numbers of pages to extract TOC. [under construction]
+specify the numbers of pages to extract TOC.
 
 ```text
 usage: --pages [numbers],[numbers],...
