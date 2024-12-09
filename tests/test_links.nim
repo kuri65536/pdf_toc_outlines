@@ -2,9 +2,9 @@
 
 License: MIT, see LICENSE
 ]##
-import ../src/pdf_toc_bookmarks/pdf_open
-import ../src/pdf_toc_bookmarks/pdf_doc
-import ../src/pdf_toc_bookmarks/pdf_links
+import ../src/pdf_toc_outlines/pdf_open
+import ../src/pdf_toc_outlines/pdf_doc
+import ../src/pdf_toc_outlines/pdf_links
 
 var pdf = pdf_open.pdf_open("test.pdf")
 assert not isNil(pdf)

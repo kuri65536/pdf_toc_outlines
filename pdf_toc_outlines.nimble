@@ -5,7 +5,7 @@ author        = "shimoda"
 description   = "A program to add outlines from TOC paragraph"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["pdf_toc_bookmarks"]
+bin           = @["pdf_toc_outlines"]
 
 
 # Dependencies

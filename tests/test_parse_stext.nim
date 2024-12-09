@@ -4,7 +4,8 @@ License: MIT, see LICENSE
 ]##
 import streams
 
-import ../src/pdf_toc_bookmarks/pdf_links
+import ../src/pdf_toc_outlines/fitz_common
+import ../src/pdf_toc_outlines/pdf_links
 
 let text = open("a.txt", fmRead).readAll()
 let strm = newStringStream(text)

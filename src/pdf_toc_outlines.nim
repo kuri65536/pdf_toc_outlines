@@ -5,12 +5,12 @@ License: MIT, see LICENSE
 import os
 import system
 
-import pdf_toc_bookmarks/app_extract
-import pdf_toc_bookmarks/app_levels
-import pdf_toc_bookmarks/app_merge
-import pdf_toc_bookmarks/app_outlines
-import pdf_toc_bookmarks/app_subst
-import pdf_toc_bookmarks/options
+import pdf_toc_outlines/app_extract
+import pdf_toc_outlines/app_levels
+import pdf_toc_outlines/app_merge
+import pdf_toc_outlines/app_outlines
+import pdf_toc_outlines/app_subst
+import pdf_toc_outlines/options
 
 
 proc main(args: seq[string]): int =

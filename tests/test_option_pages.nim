@@ -2,7 +2,7 @@
 
 License: MIT, see LICENSE
 ]##
-import ../src/pdf_toc_bookmarks/options
+import ../src/pdf_toc_outlines/options
 
 block:  ## - test.1 default values
     let opt = options(@["dummy.pdf"])

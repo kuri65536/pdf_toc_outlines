@@ -1,4 +1,6 @@
-/pdf_toc_bookmarks
+/pdf_toc_outlines
+build
+html
 nimcache
 testresults
 testresults.html

@@ -2,10 +2,10 @@
 
 License: MIT, see LICENSE
 ]##
-import ../src/pdf_toc_bookmarks/pdf_open
-import ../src/pdf_toc_bookmarks/pdf_doc
-import ../src/pdf_toc_bookmarks/pdf_links
-import ../src/pdf_toc_bookmarks/pdf_outlines
+import ../src/pdf_toc_outlines/pdf_open
+import ../src/pdf_toc_outlines/pdf_doc
+import ../src/pdf_toc_outlines/pdf_links
+import ../src/pdf_toc_outlines/pdf_outlines
 
 
 var pdf = pdf_open.pdf_open("test.pdf")
@@ -20,7 +20,7 @@ for page in pdf_doc.pdf_pages(pdf):
         ## @todo impl extract title from links.
         n += 1
         links.add((link.uri, $n))
-        link = pdf_links.pdf_link_next(link)
+        link = pdf_links.pdf_link_next(pdf, link)
 
 for (uri, title) in links[1 ..^ 1]:
     n += 1
