@@ -1,0 +1,32 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: pdf-toc-outlines
+Upstream-Contact: <preferred name and address to reach the upstream project>
+Source: https://github.com/kuri65536/pdf_toc_outlines
+#
+# Please double check copyright with the licensecheck(1) command.
+
+Files:     src/Makefile
+           src/pdf_toc_outlines.nim
+           src/pdf_toc_outlines/app_common.nim
+           src/pdf_toc_outlines/app_extract.nim
+           src/pdf_toc_outlines/app_levels.nim
+           src/pdf_toc_outlines/app_merge.nim
+           src/pdf_toc_outlines/app_outlines.nim
+           src/pdf_toc_outlines/app_subst.nim
+           src/pdf_toc_outlines/fitz_common.nim
+           src/pdf_toc_outlines/options.nim
+           src/pdf_toc_outlines/pdf_common.nim
+           src/pdf_toc_outlines/pdf_doc.nim
+           src/pdf_toc_outlines/pdf_links.nim
+           src/pdf_toc_outlines/pdf_open.nim
+           src/pdf_toc_outlines/pdf_outlines.nim
+Copyright: shimoda <kuri65536@hotmail.com>
+License:   MIT License
+
+#----------------------------------------------------------------------------
+# huge files   (skipped):
+#         pdf-toc-outlines-0.1.tar.gz
+
+#----------------------------------------------------------------------------
+# Files marked as NO_LICENSE_TEXT_FOUND may be covered by the following
+# license/copyright files.
