@@ -1,0 +1,48 @@
+name: CI to build deb package
+
+on:
+  push:
+    branches: [ "kuri65536-patch-1" ]
+  pull_request:
+    branches: [ "kuri65536-patch-1" ]
+env:
+  nimlatest: "2.0.4"
+
+jobs:
+  build_deb:
+    strategy:
+      matrix:
+        nimver: ["2.0.4"]
+        debian: ["bookworm", "bullseye"]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: uraimo/run-on-arch-action@v2
+      id:   runcmds
+      with:
+        arch: amd64
+        distro: debian
+      - name: install packages
+        run: |
+             sudo apt-get update
+
+        - name: install dependencies
+          run: |
+             sudo apt-get update
+
+    - uses: iffy/install-nim@v5
+      with:
+        version: ${{ matrix.nimver }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: make hash for this environment
+      run: |
+          nim --version > nim-version.txt
+
+    - uses: actions/cache@v4
+      with:
+        path: /usr/bin
+        key:  ${{ runner.os }}-build-${{ hashFiles('nim-version.txt') }}
+
