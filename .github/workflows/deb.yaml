@@ -23,14 +23,10 @@ jobs:
       with:
         arch: amd64
         distro: debian
-      - name: install packages
-        run: |
-             sudo apt-get update
-
-        - name: install dependencies
-          run: |
-             sudo apt-get update
-
+    - name: install packages
+      run:  |
+            sudo apt-get update
+            sudo apt-get install -y libmupdf
     - uses: iffy/install-nim@v5
       with:
         version: ${{ matrix.nimver }}
@@ -45,4 +41,8 @@ jobs:
       with:
         path: /usr/bin
         key:  ${{ runner.os }}-build-${{ hashFiles('nim-version.txt') }}
+    - name: build
+      run:  nimble build
+    - name: package
+      run:  make deb
 
