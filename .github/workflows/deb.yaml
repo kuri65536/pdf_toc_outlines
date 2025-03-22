@@ -22,7 +22,7 @@ jobs:
       id:   runcmds
       with:
         arch: amd64
-        distro: debian
+        distro: ${{ matrix.debian }}
     - name: install packages
       run:  |
             sudo apt-get update
