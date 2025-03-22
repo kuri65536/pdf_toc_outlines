@@ -21,11 +21,7 @@ jobs:
       with:
         path: nim/bin/nim
         key:  ${{ runner.os }}-build-${{ hashFiles('version.txt') }}
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: install packages
+      run:  pacman -S mingw-w64-x86_64-libmupdf
+    - name: build
+      run:  nimble build
