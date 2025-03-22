@@ -10,6 +10,11 @@ jobs:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v4
+    - uses: msys2/setup-msys2@v2
+      with:
+        update:  true
+        msystem: MINGW64
+        install: mingw-w64-x86_64-libmupdf
     - name: Setup Nim environment
       uses: jiro4989/setup-nim-action@v1.1.4
       with:
@@ -21,7 +26,5 @@ jobs:
       with:
         path: nim/bin/nim
         key:  ${{ runner.os }}-build-${{ hashFiles('version.txt') }}
-    - name: install packages
-      run:  pacman -S mingw-w64-x86_64-libmupdf
     - name: build
       run:  nimble build
