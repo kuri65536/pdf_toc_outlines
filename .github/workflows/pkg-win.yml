@@ -26,5 +26,7 @@ jobs:
       with:
         path: nim/bin/nim
         key:  ${{ runner.os }}-build-${{ hashFiles('version.txt') }}
+    - name: install dependencies
+      run:  nimble install -d
     - name: build
-      run:  nimble build
+      run:  nim c -d:mingw src/pdf_toc_outlines.nim 
