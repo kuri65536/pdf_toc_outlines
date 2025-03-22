@@ -14,10 +14,13 @@ jobs:
       uses: jiro4989/setup-nim-action@v1.1.4
       with:
         nim-version:  2.0.4 # optional, default is stable
+    - name: make hash
+      run:  nim --version > version.txt
     - name: Cache
       uses: actions/cache@v4.2.3
       with:
         path: nim/bin/nim
+        key:  ${{ runner.os }}-build-${{ hashFiles('version.txt') }}
     - name: configure
       run: ./configure
     - name: make
