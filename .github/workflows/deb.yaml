@@ -20,7 +20,8 @@ jobs:
     - name: install packages
       run:  |
             sudo apt-get update
-            sudo apt-get install -y libjpeg-dev libfreetype-dev libgumbo-dev
+            sudo apt-get install -y libjpeg-dev libjbig2dec0-dev libopenjp2-7-dev
+            sudo apt-get install -y libfreetype-dev libgumbo-dev
             sudo apt-get install -y libmujs-dev libmupdf-dev
             sudo apt-get install -y debmake
     - uses: iffy/install-nim@v5
