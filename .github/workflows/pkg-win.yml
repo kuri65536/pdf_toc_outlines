@@ -10,12 +10,6 @@ jobs:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v4
-    - name: Cache
-      id:   cache
-      uses: actions/cache@v4.2.3
-      with:
-        path: .nimble
-        key:  ${{ runner.os }}-${{ hashFiles('.nimble/bin/nim') }}
     - uses: msys2/setup-msys2@v2
       id:   msys2
       with:
@@ -26,8 +20,15 @@ jobs:
       uses: jiro4989/setup-nim-action@v1.1.4
       with:
         nim-version:  2.0.4 # optional, default is stable
+    - name: Cache
+      uses: actions/cache@v4.2.3
+      with:
+        path: |
+          .nimble
+          ${{ steps.msys2.outputs.msys2-location }}
+        key:  ${{ runner.os }}-${{ hashFiles('.nimble/bin/nim') }}
     - name: install dependencies
       run:  nimble install -d
-    - run:  nim c --cc:gcc --gcc.exe=$bin --gcc.linkerexe=$bin src/pdf_toc_bookmarks.nim 
+    - run:  nim c --cc:gcc --gcc.exe="$bin1" --gcc.linkerexe="$bin1" src/pdf_toc_bookmarks.nim 
       env:
-        bin: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc
+        bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc
