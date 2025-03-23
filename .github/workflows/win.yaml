@@ -1,9 +1,9 @@
 name: create a win package
 on:
   push:
-    branches: [ "kuri65536-patch-1" ]
+    branches: [ "kuri65536-patch-3" ]
   pull_request:
-    branches: [ "kuri65536-patch-1" ]
+    branches: [ "kuri65536-patch-3" ]
 
 jobs:
   build:
