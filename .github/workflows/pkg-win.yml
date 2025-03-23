@@ -24,11 +24,11 @@ jobs:
       uses: actions/cache@v4.2.3
       with:
         path: |
-          .nimble
+          ~/.nimble
           ${{ steps.msys2.outputs.msys2-location }}
         key:  ${{ runner.os }}-${{ hashFiles('.nimble/bin/nim') }}
     - name: install dependencies
       run:  nimble install -d
-    - run:  nim c --cc:gcc --gcc.exe=${{env.bin1}} --gcc.linkerexe=${{env.bin1}} src/pdf_toc_bookmarks.nim 
+    - run:  nim c --cinclude=${{env.bin1}}/include --clib=${{env.bin1}}/lib src/pdf_toc_bookmarks.nim 
       env:
-        bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc.exe
+        bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64
