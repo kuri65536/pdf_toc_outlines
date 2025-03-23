@@ -15,7 +15,10 @@ jobs:
       with:
         update:  true
         msystem: mingw64
-        install: mingw-w64-x86_64-libmupdf mingw-w64-x86_64-toolchain
+        install: |
+          mingw-w64-x86_64-libmupdf mingw-w64-libjpeg-turbo
+          mingw-w64-harfbuzz mingw-w64-freetype mingw-w64-jbig2dec
+          mingw-w64-x86_64-gumbo-parser mingw-w64-x86_64-mujs
     - name: Setup Nim environment
       uses: jiro4989/setup-nim-action@v1.1.4
       with:
