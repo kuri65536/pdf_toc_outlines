@@ -1,0 +1,42 @@
+name: create a win package
+on:
+  push:
+    branches: [ "kuri65536-patch-1" ]
+  pull_request:
+    branches: [ "kuri65536-patch-1" ]
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v4
+    - name: cache-nim
+      uses: actions/cache@v4.2.3
+      with:
+        path: ~/.nimble
+        key:  ${{ runner.os }}-2.0.4
+    - name: cache-nim
+      uses: actions/cache@v4.2.3
+      with:
+        path: ${{ steps.msys2.outputs.msys2-location }}
+        key:  ${{ runner.os }}-1.0
+    - uses: msys2/setup-msys2@v2
+      id:   msys2
+      with:
+        update:  true
+        msystem: mingw64
+        install: |
+          mingw-w64-x86_64-libmupdf mingw-w64-x86_64-mujs
+          mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-openjpeg2
+          mingw-w64-x86_64-jbig2dec
+          mingw-w64-x86_64-gumbo-parser mingw-w64-x86_64-harfbuzz
+          mingw-w64-x86_64-freetype
+    - name: Setup Nim environment
+      uses: jiro4989/setup-nim-action@v1.1.4
+      with:
+        nim-version:  2.0.4 # optional, default is stable
+    - name: install dependencies
+      run:  nimble install -d
+    - run:  nim c --cincludes=${{env.bin1}}/include --clibdir=${{env.bin1}}/lib --clib:ssp src/pdf_toc_bookmarks.nim 
+      env:
+        bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64
