@@ -29,4 +29,4 @@ jobs:
     - name: install dependencies
       run:  nimble install -d
     - name: build
-      run:  nim c -d:mingw src/pdf_toc_outlines.nim 
+      run:  nim c -d:mingw src/pdf_toc_bookmarks.nim 
