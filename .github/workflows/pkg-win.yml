@@ -16,9 +16,11 @@ jobs:
         update:  true
         msystem: mingw64
         install: |
-          mingw-w64-x86_64-libmupdf mingw-w64-x86_64-libjpeg-turbo
-          mingw-w64-x86_64-harfbuzz mingw-w64-x86_64-freetype mingw-w64-x86_64-jbig2dec
-          mingw-w64-x86_64-gumbo-parser mingw-w64-x86_64-mujs
+          mingw-w64-x86_64-libmupdf mingw-w64-x86_64-mujs
+          mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-openjpeg2
+          mingw-w64-x86_64-jbig2dec
+          mingw-w64-x86_64-gumbo-parser mingw-w64-x86_64-harfbuzz
+          mingw-w64-x86_64-freetype
     - name: Setup Nim environment
       uses: jiro4989/setup-nim-action@v1.1.4
       with:
@@ -29,7 +31,7 @@ jobs:
         path: |
           ~/.nimble
           ${{ steps.msys2.outputs.msys2-location }}
-        key:  ${{ runner.os }}-${{ hashFiles('.nimble/bin/nim') }}
+        key:  ${{ runner.os }}-${{ hashFiles('~/.nimble/bin/nim') }}
     - name: install dependencies
       run:  nimble install -d
     - run:  nim c --cincludes=${{env.bin1}}/include --clibdir=${{env.bin1}}/lib src/pdf_toc_bookmarks.nim 
