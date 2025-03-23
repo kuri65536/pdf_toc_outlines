@@ -34,6 +34,6 @@ jobs:
         key:  ${{ runner.os }}-${{ hashFiles('~/.nimble/bin/nim') }}
     - name: install dependencies
       run:  nimble install -d
-    - run:  nim c --cincludes=${{env.bin1}}/include --clibdir=${{env.bin1}}/lib src/pdf_toc_bookmarks.nim 
+    - run:  nim c --cincludes=${{env.bin1}}/include --clibdir=${{env.bin1}}/lib --clib:ssp src/pdf_toc_bookmarks.nim 
       env:
         bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64
