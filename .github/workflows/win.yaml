@@ -15,11 +15,6 @@ jobs:
       with:
         path: ~/.nimble
         key:  ${{ runner.os }}-2.0.4
-    - name: cache-nim
-      uses: actions/cache@v4.2.3
-      with:
-        path: ${{ steps.msys2.outputs.msys2-location }}
-        key:  ${{ runner.os }}-1.0
     - uses: msys2/setup-msys2@v2
       id:   msys2
       with:
@@ -37,6 +32,6 @@ jobs:
         nim-version:  2.0.4 # optional, default is stable
     - name: install dependencies
       run:  nimble install -d
-    - run:  nim c --cincludes=${{env.bin1}}/include --clibdir=${{env.bin1}}/lib --clib:ssp src/pdf_toc_bookmarks.nim 
+    - run:  nim c --cincludes=${{env.bin1}}/include --clibdir=${{env.bin1}}/lib --clib:ssp src/pdf_toc_outlines.nim 
       env:
         bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64
