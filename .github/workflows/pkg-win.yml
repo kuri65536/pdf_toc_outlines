@@ -31,4 +31,4 @@ jobs:
       run:  nimble install -d
     - run:  nim c --cc:gcc --gcc.exe=${{env.bin1}} --gcc.linkerexe=${{env.bin1}} src/pdf_toc_bookmarks.nim 
       env:
-        bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc
+        bin1: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc.exe
