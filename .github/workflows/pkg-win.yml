@@ -28,6 +28,6 @@ jobs:
         nim-version:  2.0.4 # optional, default is stable
     - name: install dependencies
       run:  nimble install -d
-    - run:  nim c --cc:gcc --gcc.exe=$bin --gcc.linkerexe=$bin src/pdf_toc_outlines.nim 
+    - run:  nim c --cc:gcc --gcc.exe=$bin --gcc.linkerexe=$bin src/pdf_toc_bookmarks.nim 
       env:
         bin: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc
