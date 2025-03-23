@@ -14,8 +14,8 @@ jobs:
       id:   msys2
       with:
         update:  true
-        msystem: MINGW64
-        install: mingw-w64-x86_64-libmupdf
+        msystem: mingw64
+        install: mingw-w64-x86_64-libmupdf mingw-w64-x86_64-toolchain
     - name: Setup Nim environment
       uses: jiro4989/setup-nim-action@v1.1.4
       with:
@@ -31,7 +31,7 @@ jobs:
       run:  nimble install -d
     - name: build
       env:
-        bin: ${{ steps.msys2.outputs.msys2-location }}
+        bin: ${{ steps.msys2.outputs.msys2-location }}/mingw64/bin/gcc
       run:  |
             echo $bin
-            nim c --cc:gcc --gcc.exe=$bin/usr/bin/gcc --gcc.linkerexe=$bin/usr/bin/gcc src/pdf_toc_bookmarks.nim 
+            nim c --cc:gcc --gcc.exe=$bin --gcc.linkerexe=$bin src/pdf_toc_bookmarks.nim 
