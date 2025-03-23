@@ -11,6 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: msys2/setup-msys2@v2
+      id:   msys2
       with:
         update:  true
         msystem: MINGW64
@@ -32,4 +33,4 @@ jobs:
         bin: ${{ steps.msys2.outputs.msys2-location }}
       run: echo "$env:bin"
     - name: build
-      run:  nim c --cc:gcc --gcc.exe=$env:bin/usr/bin/gcc --gcc.linkerexe=$env:bin/usr/bin/gcc src/pdf_toc_bookmarks.nim 
+      run:  nim c --cc:gcc --gcc.exe="$env:bin"/usr/bin/gcc --gcc.linkerexe="$env:bin"/usr/bin/gcc src/pdf_toc_bookmarks.nim 
