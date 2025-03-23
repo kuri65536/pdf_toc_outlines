@@ -1,0 +1,44 @@
+name: build the deb package on main branch
+
+on:
+  push:
+    branches: [ "kuri65536-patch-3" ]
+  pull_request:
+    branches: [ "kuri65536-patch-3" ]
+env:
+  nimlatest: "2.0.4"
+
+jobs:
+  build_deb:
+    strategy:
+      matrix:
+        nimver: ["2.0.4"]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install packages
+      run:  |
+            sudo apt-get update
+            sudo apt-get install -y libjpeg-dev libjbig2dec0-dev libopenjp2-7-dev
+            sudo apt-get install -y libfreetype-dev libgumbo-dev libharfbuzz-dev
+            sudo apt-get install -y libmujs-dev libmupdf-dev
+            sudo apt-get install -y debmake
+    - uses: iffy/install-nim@v5
+      with:
+        version: ${{ matrix.nimver }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: make hash for this environment
+      run: |
+          nim --version > nim-version.txt
+
+    - uses: actions/cache@v4
+      with:
+        path: /usr/bin
+        key:  ${{ runner.os }}-build-${{ hashFiles('nim-version.txt') }}
+    - name: build
+      run:  nimble build
+    - name: package
+      run:  make deb
