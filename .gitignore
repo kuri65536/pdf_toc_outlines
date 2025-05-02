@@ -1,4 +1,7 @@
 /pdf-toc-outlines
+/pdf-toc-outlines*.zip
+/pdf-toc-outlines.exe
+/tmp
 build/pdf-toc-outlines*
 html
 nimcache
@@ -11,4 +14,3 @@ tests/test_outlines
 tests/test_pages
 tests/test_parse_stext
 tests/test_save
-

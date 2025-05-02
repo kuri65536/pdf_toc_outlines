@@ -44,4 +44,19 @@ deb:   $(exe)
 	cd       build/$(pkg); debuild
 
 
+zip:   pkg:=pdf-toc-outlines-0.1
+zip:   pkg:=$(pkg).zip
+zip:   exe:=$(exe).exe
+zip:
+	rm -rf tmp $(pkg)
+	mkdir tmp
+	cp readme.md LICENSE $(exe) tmp
+	(echo "[InternetShortcut]"; \
+      echo "URL=$$(git remote get-url origin)") > tmp/web-site.url
+	ldd tmp/$(exe) | grep ucrt64 | cut -d " " -f 1 | \
+	     while read l; do cp /ucrt64/bin/$$l tmp; done
+	cd tmp; zip -gur ../$(pkg) *
+	rm -rf tmp
+
+
 .PHONY: all build deb install

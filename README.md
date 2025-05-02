@@ -35,7 +35,7 @@ Usage
 -----------------------------------------
 
 ### Build in Debian Bookworm
-- setup dependencies
+- install setup dependencies
 
 ```shell
 $ sudo apt install libmupdf-dev libmujs-dev
@@ -50,6 +50,20 @@ $ sudo apt install libjbig2dec0-dev libfreetype-dev
 $ git clone https://github.com/kuri65536/pdf_toc_outlines
 $ cd pdf_toc_ooutlines
 $ nimble build
+```
+
+
+### Build with mingw64
+- install setup dependencies
+
+```shell
+$ pacman -S mingw-w64-ucrt-x86_64-libmupdf
+$ pacman -S mingw-w64-ucrt-x86_64-mujs
+$ pacman -S mingw-w64-ucrt-x86_64-gumbo-parser
+$ pacman -S mingw-w64-ucrt-x86_64-openjpeg2
+$ pacman -S mingw-w64-ucrt-x86_64-jbig2dec
+$ pacman -S mingw-w64-ucrt-x86_64-freetype
+$ pacman -S mingw-w64-ucrt-x86_64-harfbuzz
 ```
 
 
