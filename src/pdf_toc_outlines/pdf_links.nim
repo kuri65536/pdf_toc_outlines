@@ -14,6 +14,9 @@ import pdf_common
 
 
 type
+  fz_ctx {.importc: "fz_context*".} = pointer
+  const_ptr {.importc: "const void*".} = pointer
+
   rect_tup* = tuple[x0, y0, x1, y1: float]
 
   PdfLink* = ref object of RootObj
@@ -271,7 +274,7 @@ proc fz_load_text(a, b: pointer, src: PdfLink): string =
         discard
     strm = newStringStream()
 
-    proc fn(ctx, state, data: pointer, n: uint): void {.cdecl.} =
+    proc fn(ctx: fz_ctx, state: pointer, data: const_ptr, n: csize_t): void {.cdecl.} =
         let tmp = cast[ptr UncheckedArray[char]](data)
         for i in 0 .. n - 1:
             strm.write(tmp[i])
